@@ -2,7 +2,7 @@ Requirement Analysis PolSim
 ===========================
 Amin Haidar, Noel Monnerat, Samuel Pearce, Alban Selimi
 
----
+<<<
 Table of Contents:
 
 - Project Description
@@ -12,7 +12,6 @@ Table of Contents:
 - Interview
   * Preparation
   * Protocol
-  * Auswertung
 - Entity Relationship Model
 - Entity Descriptions
   * Person
@@ -25,6 +24,8 @@ Table of Contents:
 - DBMS Decision
 - Specifications
   * Decision Method
+  * Action Method
+  * Naming Convention
 
 <<<
 
@@ -69,6 +70,8 @@ opposite direction. If you already have some pseudo-countries
 set up you could join together and form grand alliances like
 the united nations.
 
+<<<
+
 Requirements
 ------------
 
@@ -87,15 +90,120 @@ Non-Functional Requirements
 - Database is in the 5th normal form
 - All errors are handled correctly
 
+<<<
+
 Interview
 ---------
 
-[IMPORTANT]
-Insert notes from our interview here
+Preparation
+~~~~~~~~~~~
+For the customer interview, we wanted to get as many specifications as
+possible, given the complexity and scale of this concept. We decided to
+ask some of the more specific questions we were wondering about how the
+system should allow many different systems to be included.
+
+We discussed together which questions would be most important in order
+to improve the quality and decrease the overall quantity of questions
+we had to berate the customer with.
+
+*Our goals for the interview were to:*
+
+- Have a better understanding of the general idea behind the project.
+- Specify exactly how the system should work and agree with the customer on the specification.
+- Answer some questions about unclear details.
+
+*Interview Details:*
+
+We decided to meet at TBZ on tuesday for the interview.
+Samuel will lead the interview.
+All members of ou team would be present for the interview
+should any last-minute questions arise.
+
+Protocol
+~~~~~~~~
+Question 1: :::
+    Question: ::
+        How should the many layers of disparate government
+        systems be represented and implemented?
+    Answer: ::
+        The people should be able to create groups. Every
+        person can only be in a single group at any given
+        time. However, these groups can be nested inside
+        each other. For example: A party is a group in
+        the parliament which is inside the country which
+        is inside an alliance, et cetera.
+
+Question 2: :::
+    Question: ::
+        How can people vote on the topics? How are the
+        votes counted and processed?
+    Answer: ::
+        Each person has a percentage of the total available
+        political power in each layer. groups can also
+        have a percentage of the power. For example
+        if a group of people join a group, all the power
+        they owned in the layer above is given to the
+        group as a whole and inside the group each person
+        holds an equal share of the power of that layer.
+
+Question 3: :::
+    Question: ::
+        What should be done, if anything, to avoid ties?
+    Answer: ::
+        Whoever originally creates a group becomes leader
+        and their decision is worth slightly more than the
+        the others. But to avoid tyrrany, who becomes the
+        leader is voted on by everyone in the group.
+
+Question 4: :::
+    Question: ::
+        What kind of actions should the people be able to
+        vote on and perform?
+    Answer: ::
+        As long as the people have voting power, they can:
+        - Create new groups
+        - Add person to a group
+        - Remove person from a group
+        - Transfer political power
+        - Change the current group leader
+        - Revolt against the government
+
+Question 5: :::
+    Question: ::
+        How are revolutions handled? Can anybody start one?
+    Answer: ::
+        Anybody, no matter whether they have political
+        power or not, can start a vote for revolution.
+        Everybody in the affected group who votes in favour
+        of the revolution joins the revolution and all those
+        against join the defense. Each pair of one revolutionary
+        and defender have "battles". In these battles each
+        side has a 50% chance of winning the battle. this
+        continues until one side has no more participators.
+        This introduces an element of luck to the revolts
+        while simultaneously eliminating the possibility
+        of a tie.
+
+Question 6: :::
+    Question: ::
+        How are the different layers differentiated?
+    Answer: ::
+        There are three main kinds of votes:
+        Local votes are votes that involve all the people
+        and groups inside the current group.
+        Global votes are votes that involve all the people
+        and groups in the group one layer above the current
+        group.
+        Universal votes are votes that involve all the
+        people and groups in the entire system.
+
+<<<
 
 Entity Relationship Model
 -------------------------
 image::ERM_153.png[Entity Relationship model]
+
+<<<
 
 Entity Descriptions
 -------------------
@@ -205,16 +313,20 @@ arguments to be passed to an SQL command.
 - Type: the datatype of this argument
 - Value: the value to be passed as this argument
 
+<<<
+
 DBMS Decision
 -------------
 
 [IMPORTANT]
 Insert DBMS Decision matrix here
 
+<<<
+
 Specifications
 --------------
 
-Decision method
+Decision Method
 ~~~~~~~~~~~~~~~
 Decisions are approved or denied by a majority vote.
 Votes are either on the local, global or universal level.
@@ -254,3 +366,37 @@ of the result. Bill, David, James and bob live in a direct
 democracy and each have one quarter of the decision
 power of switzerland. Both countries hold half of all
 power in the world.
+
+Action Method
+~~~~~~~~~~~~~
+In order to keep the database a simple, flexible and
+future-proof as possible, there is chain of tables to
+run actions and allow them to be completely configurable.
+
+The action table is what is easily visible externally
+as an "action". (e.g. Create group with set members)
+The action itself essentially contains a list of
+SQL commands to be executed on the server to change
+the system as intended by the person who created
+this action.
+
+Each command is simply a single SQL command with all
+necessary arguments substituted by a question-mark (?).
+This allows the commands to still be flexible and
+able to have as many arguments as are necessary.
+
+The arguments that are provided to the commands are
+stored in a seperate table called "argumen". This
+table holds the type and value information for one
+of the arguments to be used by the commands.
+
+Naming Convention
+~~~~~~~~~~~~~~~~~
+*Table Names:* `<tblname>, lowercase` +
+*Primary Key:* `ID_<tblname>, lowercase` +
+*Foreign Key:* `<name>_<reftable>_ID, lowercase` +
+*Column Names:* `<colname>, lowercase` +
+*View Names:* `v_<name>, lowercase` +
+*Index Names:* `idx_<name>, lowercase` +
+*Trigger Names:* `trg_<name>, lowercase` +
+*Stored Procedure Names:* `stp_<name>, lowercase`
