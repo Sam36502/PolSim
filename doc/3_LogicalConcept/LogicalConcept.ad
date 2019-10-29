@@ -1,0 +1,188 @@
+Logical Concept PolSim
+======================
+Amin Haidar, Noel Monnerat, Samuel Pearce, Alban Selimi
+
+---
+<<<
+
+Table of Contents:
+
+- Table Structure
+- Indices
+- Constraints
+- Triggers
+- Stored Procedures
+- Views
+- ERM/ERD
+- Naming Convention
+
+<<<
+
+Table Structure
+---------------
+
+.Group
+[width="100%",options="header"]
+|====================
+| Key | Field            | Datatype    | Options
+| PK  | ID_group         | INT         | NOT NULL, UNIQUE, AUTO_INCREMENT
+|     | groupname        | VARCHAR(50) | NOT NULL, UNIQUE
+| FK  | leader_person_ID | INT         | NOT NULL
+|     | power            | INT         | NOT NULL
+| FK  | parent_group_ID  | INT         | NOT NULL
+|====================
+
+.Person
+[width="100%",options="header"]
+|====================
+| Key | Field            | Datatype     | Options
+| PK  | ID_person        | INT          | NOT NULL, UNIQUE, AUTO_INCREMENT
+|     | username         | VARCHAR(50)  | NOT NULL, UNIQUE
+|     | passwordhash     | VARCHAR(255) | NOT NULL
+| FK  | member_group_ID  | INT          | NOT NULL
+|     | power            | INT          | NOT NULL
+|====================
+
+.Vote
+[width="100%",options="header"]
+|====================
+| Key | Field               | Datatype | Options
+| PK  | ID_vote             | INT      | NOT NULL, UNIQUE, AUTO_INCREMENT
+| FK  | voter_person_ID     | INT      | 
+| FK  | voter_group_ID      | INT      | 
+| FK  | applied_decision_ID | INT      | NOT NULL
+|     | agreement           | BOOLEAN  | NOT NULL
+|====================
+
+.Decision
+[width="100%",options="header"]
+|====================
+| Key | Field            | Datatype     | Options
+| PK  | ID_decision      | INT          | NOT NULL, UNIQUE, AUTO_INCREMENT
+|     | title            | VARCHAR(100) | NOT NULL
+| FK  | creator_user_ID  | INT          | NOT NULL
+|     | close_time       | TIMESTAMP    | NOT NULL
+| FK  | voting_group_ID  | INT          | NOT NULL
+|     | creation_date    | TIMESTAMP    | NOT NULL, DEFAULT CURRENT_TIMESTAMP()
+|     | last_vote        | TIMESTAMP    | NOT NULL, DEFAULT CURRENT_TIMESTAMP()
+|====================
+
+.Action
+[width="100%",options="header"]
+|====================
+| Key | Field                | Datatype     | Options
+| PK  | ID_action            | INT          | NOT NULL, UNIQUE, AUTO_INCREMENT
+| FK  | approval_decision_ID | INT          | NOT NULL
+|     | description          | VARCHAR(255) | NOT NULL
+|     | exec_time            | TIMESTAMP    | NOT NULL
+|====================
+
+.Command
+[width="100%",options="header"]
+|====================
+| Key | Field                | Datatype     | Options
+| PK  | ID_command           | INT          | NOT NULL, UNIQUE, AUTO_INCREMENT
+| FK  | executing_command_ID | INT          | NOT NULL
+|     | sql_command          | VARCHAR(255) | NOT NULL
+|====================
+
+.Argument
+[width="100%",options="header"]
+|====================
+| Key | Field               | Datatype | Options
+| PK  | ID_argument         | INT      | NOT NULL, UNIQUE, AUTO_INCREMENT
+| FK  | applying_command_ID | INT      | NOT NULL
+|     | value               | INT      | NOT NULL
+|     | position            | INT      | NOT NULL
+|====================
+
+Indices
+-------
+There were two columns we decided to put indices on in order to
+be able to reference them more quickly. Namely the username column
+and the groupname column. We wanted these names to be able to be
+used as indexes and therefore had to be unique. This meant if a
+user wants to log in, they will send their username and not the
+user ID. This is why it is important that the column be fast
+when fetching data.
+
+The group column was a similar story to the username column.
+Group names need to be unique, so they can be used in the user
+interface. So we also made an index for the group column.
+
+Constraints
+-----------
+All the foreign keys listed in the above tables reference
+one another in the way described previously and shown in
+the ERM and ERD. Most of the columns are limited to not
+being NULL so that we can guarantee some of the answers will
+be at least set. There are only a few columns allowed to be
+NULL. These are voter_person_ID and voter_group_ID in the
+vote table. These columns need to be flexible so that
+both groups and people can cast votes and have them attributed
+correctly. At least one must be set though when a row is
+inserted.
+
+Triggers
+--------
+
+*Trigger 1:* `trg_unowned_vote` +
+As mentioned previously, there is the possibility, that a vote
+could be inserted, that has no owner, and can therefore not be
+validated. These votes should automatically be removed.
+This will be triggered by an insertion into the vote table.
+If the new vote has neither a person owner, nor a group owner,
+it is deleted from the table.
+
+Stored Procedures
+-----------------
+
+*Stored Procedure 1* `stp_compile_command(INT command_ID)` +
+This procedure will return a command's SQL statement with
+all the values filled in from the argument table. This means
+that most of the work interpreting the actions is done by
+the database itself. This saves time later on with the
+program and ensures efficiency.
+
+*Stored Procedure 2* `stp_even_power(INT group_ID)` +
+When a new group is created, a revolution is succesful or
+a new member is added, all the political power is shared
+equally amongst the group's members. This procedure
+automates this process of equalizing the power. It takes
+the total population of the current group and divides
+100 power points to each member group or person.
+
+Views
+-----
+
+*View 1* `v_user_groups` +
+This view makes it easier to get an overview of the people's
+connections. Each person's username is listed out beside the
+name of the group they're in.
+
+*View 2* `v_decision_results` +
+This view was supposed to display the number of political
+power points of support have been given in favour of or
+against any decision in total. Although, as of writing this
+it doesn't appear to be working correctly as on of the internal
+commands can return a NULL, which propagates forward, ruining
+the result numbers.
+
+
+ERM / ERD
+---------
+image::../2_DataModel/ERM_153.png[alt=Entity Relationship Model]
+
+image::../2_DataModel/ERD_153.png[alt=Entity Relationship Diagram]
+
+
+Naming Convention
+-----------------
+*Table Names:* `<tblname>, lowercase` +
+*Primary Key:* `ID_<tblname>, lowercase` +
+*Foreign Key:* `<name>_<reftable>_ID, lowercase` +
+*Column Names:* `<colname>, lowercase` +
+*View Names:* `v_<name>, lowercase` +
+*Index Names:* `idx_<name>, lowercase` +
+*Trigger Names:* `trg_<name>, lowercase` +
+*Stored Procedure Names:* `stp_<name>, lowercase`

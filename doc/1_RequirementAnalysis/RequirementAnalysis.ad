@@ -217,7 +217,7 @@ person also requires a username that is unique.
 
 *Attributes:*
 
-- Name: unique title for referencing users
+- Username: unique title for referencing users
 - Group: this is the group the person is in
 - Can Vote: a boolean value whether this person
   has the right to vote
@@ -233,7 +233,7 @@ inside themselves.
 
 *Attributes:*
 
-- Name: unique title for referencing groups
+- Groupname: unique title for referencing groups
 - Leader: person who created this group
   and also who breaks ties in voting
 - Parent Group: the group this group is in
@@ -250,6 +250,8 @@ to approving the decision.
 *Attributes:*
 
 - Person: the person casting this particular vote
+- Group: the group casting this vote. Only one of
+  these two can be set.
 - Decision: the decision this person is deciding on
 - Agreement: whether the person agrees to approve
   this decision.
@@ -267,7 +269,13 @@ and valid votes cast in favour of the decision.
 - Creator: the person who initiated the decision
 - Close Time: the time when voting is closed and
   the decision is either accepted or rejected.
-- 
+- Voting: this is the reference to the group that
+  will be affected by this change, and that get
+  to vote on it's outcome.
+- Create Date: the date that the decision
+  was created on.
+- Last Vote: the timestamp of the latest vote
+  and therefore last change to the outcome
 
 Action:
 ~~~~~~~
@@ -304,14 +312,18 @@ called "Create group".
 Argument:
 ~~~~~~~~~
 Commands can have varying numbers and types of arguments,
-so this table contains the type and value of all the
-arguments to be passed to an SQL command.
+so this table contains the value of all the
+arguments to be passed to an SQL command. Luckily all
+the commands we need to be able to apply to the databse
+have only integer arguments, so we don't need to store
+the data type.
 
 *Attributes:*
 
 - Command: the command that accepts this argument
-- Type: the datatype of this argument
-- Value: the value to be passed as this argument
+- Value: the integer value to be passed
+- Position: the order in which the arguments should
+  be inserted into the commands
 
 <<<
 

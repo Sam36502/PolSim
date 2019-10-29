@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?><?asciidoc-toc?><?asciidoc-numbered?><article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en">
+<info>
+<title>Data Model PolSim</title>
+<date>2019-10-27</date>
+<author>
+<personname>
+<firstname>Amin Haidar, Noel Monnerat, Samuel Pearce, Alban Selimi</firstname>
+</personname>
+</author>
+<authorinitials>A</authorinitials>
+</info>
+<simpara><?asciidoc-pagebreak?></simpara>
+<simpara>Table of Contents:</simpara>
+<itemizedlist>
+<listitem>
+<simpara>Entity Descriptions</simpara>
+<itemizedlist>
+<listitem>
+<simpara>Person</simpara>
+</listitem>
+<listitem>
+<simpara>Group</simpara>
+</listitem>
+<listitem>
+<simpara>Vote</simpara>
+</listitem>
+<listitem>
+<simpara>Decision</simpara>
+</listitem>
+<listitem>
+<simpara>Action</simpara>
+</listitem>
+<listitem>
+<simpara>Command</simpara>
+</listitem>
+<listitem>
+<simpara>Argument</simpara>
+</listitem>
+</itemizedlist>
+</listitem>
+<listitem>
+<simpara>Entity Relationship Model</simpara>
+</listitem>
+<listitem>
+<simpara>Entity Relationship Diagram</simpara>
+</listitem>
+</itemizedlist>
+<simpara><?asciidoc-pagebreak?></simpara>
+<section xml:id="_entity_descriptions">
+<title>Entity Descriptions</title>
+<section xml:id="_person">
+<title>Person</title>
+<simpara>Naturally, we will need an entity to store information
+about each user. This entity will have the ability to
+join groups and vote on decisions in that group. Each
+person also requires a username that is unique.</simpara>
+<simpara><emphasis role="strong">Attributes:</emphasis></simpara>
+<itemizedlist>
+<listitem>
+<simpara>Username: unique title for referencing users</simpara>
+</listitem>
+<listitem>
+<simpara>Group: this is the group the person is in</simpara>
+</listitem>
+<listitem>
+<simpara>Can Vote: a boolean value whether this person
+has the right to vote</simpara>
+</listitem>
+<listitem>
+<simpara>Power: the amount of weight this one person’s
+vote has in a decision</simpara>
+</listitem>
+</itemizedlist>
+</section>
+<section xml:id="_group">
+<title>Group</title>
+<simpara>This entity stores all the information of the hierarchical
+structure of the different governments. This entity
+is also self-referential, so that the groups can be nested
+inside themselves.</simpara>
+<simpara><emphasis role="strong">Attributes:</emphasis></simpara>
+<itemizedlist>
+<listitem>
+<simpara>Groupname: unique title for referencing groups</simpara>
+</listitem>
+<listitem>
+<simpara>Leader: person who created this group
+and also who breaks ties in voting</simpara>
+</listitem>
+<listitem>
+<simpara>Parent Group: the group this group is in</simpara>
+</listitem>
+<listitem>
+<simpara>Power: the amount of weight this one group’s
+vote has in a decision</simpara>
+</listitem>
+</itemizedlist>
+</section>
+<section xml:id="_vote">
+<title>Vote</title>
+<simpara>This records what every person votes on the decisions.
+It references the decision and the person who cast the
+vote, as well as whether the person agrees or disagrees
+to approving the decision.</simpara>
+<simpara><emphasis role="strong">Attributes:</emphasis></simpara>
+<itemizedlist>
+<listitem>
+<simpara>Person: the person casting this particular vote</simpara>
+</listitem>
+<listitem>
+<simpara>Group: the group casting this vote. Only one of
+these two can be set.</simpara>
+</listitem>
+<listitem>
+<simpara>Decision: the decision this person is deciding on</simpara>
+</listitem>
+<listitem>
+<simpara>Agreement: whether the person agrees to approve
+this decision.</simpara>
+</listitem>
+</itemizedlist>
+</section>
+<section xml:id="_decision">
+<title>Decision</title>
+<simpara>Every decision that needs to be made, and has already
+been made, will be stored in this table. The outcome of
+this vote is gotten, by counting the number of unique
+and valid votes cast in favour of the decision.</simpara>
+<simpara><emphasis role="strong">Attributes:</emphasis></simpara>
+<itemizedlist>
+<listitem>
+<simpara>Title: a short description of the vote topic</simpara>
+</listitem>
+<listitem>
+<simpara>Creator: the person who initiated the decision</simpara>
+</listitem>
+<listitem>
+<simpara>Close Time: the time when voting is closed and
+the decision is either accepted or rejected.</simpara>
+</listitem>
+<listitem>
+<simpara>Voting: this is the reference to the group that
+will be affected by this change, and that get
+to vote on it’s outcome.</simpara>
+</listitem>
+<listitem>
+<simpara>Create Date: the date that the decision
+was created on.</simpara>
+</listitem>
+<listitem>
+<simpara>Last Vote: the timestamp of the latest vote
+and therefore last change to the outcome</simpara>
+</listitem>
+</itemizedlist>
+</section>
+<section xml:id="_action">
+<title>Action:</title>
+<simpara>When a decision is approved it can perform any
+number of actions. An action is a group of
+SQL statements that get performed on the database.
+For example, if you want to change the leader of
+a group, that would be put in the database.</simpara>
+<simpara><emphasis role="strong">Attributes:</emphasis></simpara>
+<itemizedlist>
+<listitem>
+<simpara>Decision: the decision that will approve or deny
+that this action can pass</simpara>
+</listitem>
+<listitem>
+<simpara>Description: a short explaination of what this
+action will perform upon being approved.</simpara>
+</listitem>
+<listitem>
+<simpara>Exec Time: the time when this action is performed
+if it has been approved</simpara>
+</listitem>
+</itemizedlist>
+</section>
+<section xml:id="_command">
+<title>Command:</title>
+<simpara>Actions constitute groups of commands to be executed.
+You can’t just create a group, you must also add all
+the potential members to the group as well. All those
+commands are performed in a single action, simply
+called "Create group".</simpara>
+<simpara><emphasis role="strong">Attributes:</emphasis></simpara>
+<itemizedlist>
+<listitem>
+<simpara>Action: the action that would perform this command</simpara>
+</listitem>
+<listitem>
+<simpara>SQL Command: the SQL code to be executed with this
+command with its arguments substituted</simpara>
+</listitem>
+</itemizedlist>
+</section>
+<section xml:id="_argument">
+<title>Argument:</title>
+<simpara>Commands can have varying numbers and types of arguments,
+so this table contains the value of all the
+arguments to be passed to an SQL command. Luckily all
+the commands we need to be able to apply to the databse
+have only integer arguments, so we don’t need to store
+the data type.</simpara>
+<simpara><emphasis role="strong">Attributes:</emphasis></simpara>
+<itemizedlist>
+<listitem>
+<simpara>Command: the command that accepts this argument</simpara>
+</listitem>
+<listitem>
+<simpara>Value: the integer value to be passed</simpara>
+</listitem>
+<listitem>
+<simpara>Position: the order in which the arguments should
+be inserted into the commands</simpara>
+</listitem>
+</itemizedlist>
+<simpara><?asciidoc-pagebreak?></simpara>
+</section>
+</section>
+<section xml:id="_entity_realtionship_model">
+<title>Entity Realtionship Model</title>
+<informalfigure>
+<mediaobject>
+<imageobject>
+<imagedata contentwidth="100%" fileref="ERM_153.png"/>
+</imageobject>
+<textobject><phrase>Entity Relationship Model</phrase></textobject>
+</mediaobject>
+</informalfigure>
+<simpara><?asciidoc-pagebreak?></simpara>
+</section>
+<section xml:id="_entity_realtionship_diagram">
+<title>Entity Realtionship Diagram</title>
+<informalfigure>
+<mediaobject>
+<imageobject>
+<imagedata contentwidth="100%" fileref="ERD_153.png"/>
+</imageobject>
+<textobject><phrase>Entity Relationship Diagram</phrase></textobject>
+</mediaobject>
+</informalfigure>
+</section>
+</article>

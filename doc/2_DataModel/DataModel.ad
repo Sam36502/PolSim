@@ -1,0 +1,151 @@
+Data Model PolSim
+=================
+Amin Haidar, Noel Monnerat, Samuel Pearce, Alban Selimi
+
+---
+<<<
+
+Table of Contents:
+
+- Entity Descriptions
+  * Person
+  * Group
+  * Vote
+  * Decision
+  * Action
+  * Command
+  * Argument
+- Entity Relationship Model
+- Entity Relationship Diagram
+
+<<<
+
+Entity Descriptions
+-------------------
+
+Person
+~~~~~~
+Naturally, we will need an entity to store information
+about each user. This entity will have the ability to
+join groups and vote on decisions in that group. Each
+person also requires a username that is unique.
+
+*Attributes:*
+
+- Username: unique title for referencing users
+- Group: this is the group the person is in
+- Can Vote: a boolean value whether this person
+  has the right to vote
+- Power: the amount of weight this one person's
+  vote has in a decision
+
+Group
+~~~~~
+This entity stores all the information of the hierarchical
+structure of the different governments. This entity
+is also self-referential, so that the groups can be nested
+inside themselves.
+
+*Attributes:*
+
+- Groupname: unique title for referencing groups
+- Leader: person who created this group
+  and also who breaks ties in voting
+- Parent Group: the group this group is in
+- Power: the amount of weight this one group's
+  vote has in a decision
+
+Vote
+~~~~
+This records what every person votes on the decisions.
+It references the decision and the person who cast the
+vote, as well as whether the person agrees or disagrees
+to approving the decision.
+
+*Attributes:*
+
+- Person: the person casting this particular vote
+- Group: the group casting this vote. Only one of
+  these two can be set.
+- Decision: the decision this person is deciding on
+- Agreement: whether the person agrees to approve
+  this decision.
+
+Decision
+~~~~~~~~
+Every decision that needs to be made, and has already
+been made, will be stored in this table. The outcome of
+this vote is gotten, by counting the number of unique
+and valid votes cast in favour of the decision.
+
+*Attributes:*
+
+- Title: a short description of the vote topic
+- Creator: the person who initiated the decision
+- Close Time: the time when voting is closed and
+  the decision is either accepted or rejected.
+- Voting: this is the reference to the group that
+  will be affected by this change, and that get
+  to vote on it's outcome.
+- Create Date: the date that the decision
+  was created on.
+
+Action:
+~~~~~~~
+When a decision is approved it can perform any
+number of actions. An action is a group of
+SQL statements that get performed on the database.
+For example, if you want to change the leader of
+a group, that would be put in the database.
+
+*Attributes:*
+
+- Decision: the decision that will approve or deny
+  that this action can pass
+- Description: a short explaination of what this
+  action will perform upon being approved.
+- Exec Time: the time when this action is performed
+  if it has been approved
+
+Command:
+~~~~~~~~
+Actions constitute groups of commands to be executed.
+You can't just create a group, you must also add all
+the potential members to the group as well. All those
+commands are performed in a single action, simply
+called "Create group".
+
+*Attributes:*
+
+- Action: the action that would perform this command
+- SQL Command: the SQL code to be executed with this
+  command with its arguments substituted
+
+
+Argument:
+~~~~~~~~~
+Commands can have varying numbers and types of arguments,
+so this table contains the value of all the
+arguments to be passed to an SQL command. Luckily all
+the commands we need to be able to apply to the databse
+have only integer arguments, so we don't need to store
+the data type.
+
+*Attributes:*
+
+- Command: the command that accepts this argument
+- Value: the integer value to be passed
+- Position: the order in which the arguments should
+  be inserted into the commands
+
+<<<
+
+Entity Realtionship Model
+-------------------------
+image::ERM_153.png[alt=Entity Relationship Model, width=100%]
+
+<<<
+
+Entity Realtionship Diagram
+---------------------------
+image::ERD_153.png[Entity Relationship Diagram, width=100%]
